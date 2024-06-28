@@ -62,7 +62,27 @@ def plot_freq(cli: milc.MILC) -> None:
     keyword = cli.args.keyword
     if keyword is not None:
         messages = [message for message in messages if re.search(keyword, message.text, re.IGNORECASE)]
-    viz.plot_message_frequency(messages, keyword)
+    viz.plot_frequency(messages, keyword)
+
+
+@milc.cli.argument('-c', '--chat', help="The database table to plot frequency for")
+@milc.cli.argument('-k', '--keyword', help="A keyword to plot the frequency of in the given chat")
+@milc.cli.subcommand('Plot the message frequency over time for each sender in a specific chat')
+def plot_freq_per_sender(cli: milc.MILC) -> None:
+    chat_name = cli.args.chat if cli.args.chat else missing_arg("Chat name is required")
+
+    with db.create_conn('postgres') as conn:
+        if not db.db_exists(conn, configs['database']['name']):
+            error(f"Database does not exist, import a chat to create it")
+            exit(1)
+
+    with db.create_conn(configs['database']['name']) as conn:
+        messages = db.get_all_messages(conn, chat_name)
+
+    keyword = cli.args.keyword
+    if keyword is not None:
+        messages = [message for message in messages if re.search(keyword, message.text, re.IGNORECASE)]
+    viz.plot_frequency_per_sender(messages, keyword)
 
 
 @milc.cli.argument('-n', '--name', help="The name of the configuration item to set, in dot notation (ex: 'database.host')")
