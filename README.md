@@ -6,35 +6,43 @@ into database tables, and then lets you query and plot various statistics for th
 Chatminer currently depends on an external instance of Postgres for the database.
 Database connection info can be specified using chatminer commands.
 
+## Installation
+
+You can install chatminer using pip:
+
+```bash
+pip install git+https://github.com/tbrandirali/chatminer.git@main
+```
+
 ## Usage
 
-Import a new chat from a `.txt` file.
+Import a new chat from a `.txt` file:
 
 ```bash
 chatminer create -i "path/to/chat_file.txt" -c "chat_name"
 ```
 
-Plot the overall frequency of messages for a chat.
+Plot the overall frequency of messages for a chat:
 
 ```bash
 chatminer frequency -c "chat_name"
 ```
 
-Plot the frequency of messages containing a specific keyword for a chat.
-The keyword can be a full regex expression.
+Plot the frequency of messages containing a specific keyword for a chat 
+(the keyword can be a full regex expression):
 
 ```bash
 chatminer frequency -c "chat_name" -k "keyword"
 ```
 
-Plot the frequency of messages for each sender in a chat.
-This command supports keyword filtering like the previous one.
+Plot the frequency of messages for each sender in a chat
+(supports keyword filtering like the previous command):
 
 ```bash
 chatminer frequency-per-sender -c "chat_name" -k "keyword"
 ```
 
-Delete an imported chat.
+Delete an imported chat:
 
 ```bash
 chatminer delete -c "chat_name"
@@ -51,20 +59,20 @@ its own database with the name given in `database.name` (defaults to "chatminer"
 if it doesn't already exist. If it's not running as admin then it expects a database
 with the configured name to already exist.
 
-Set persistent configuration options.
+Set persistent configuration options:
 
 ```bash
 chatminer configure -n "database.host" -v "localhost"
 ```
 
-Reset chatminer's config file to its default values.
+Reset chatminer's config file to its default values:
 
 ```bash
 chatminer configure -r
 ```
 
-Uninstall chatminer: remove files persisted by it and databases created 
-in its current configuration.
+Uninstall chatminer, remove files persisted by it and databases created 
+in its current configuration:
 
 ```bash
 chatminer uninstall
