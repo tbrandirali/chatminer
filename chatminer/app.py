@@ -24,8 +24,9 @@ def create(cli: milc.MILC) -> None:
 
     messages, notifications = parser.parse(lines)
 
-    with db.create_conn('postgres', autocommit=True) as conn:
-        db.create_db(conn)
+    if configs['database']['admin']:
+        with db.create_conn('postgres', autocommit=True) as conn:
+            db.create_db(conn)
 
     with db.create_conn(configs['database']['name']) as conn:
         db.create_messages_table(conn, chat_name)

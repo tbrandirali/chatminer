@@ -9,6 +9,7 @@ from chatminer.common import log
 
 DEFAULT_CONFIGS = {
     'database': {
+        'admin': True,
         'host': 'localhost',
         'name': 'chatminer',
         'user': 'postgres',
