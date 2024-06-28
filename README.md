@@ -17,21 +17,21 @@ chatminer create -i "path/to/chat_file.txt" -c "chat_name"
 Plot the overall frequency of messages for a chat.
 
 ```bash
-chatminer plot-freq -c "chat_name"
+chatminer frequency -c "chat_name"
 ```
 
 Plot the frequency of messages containing a specific keyword for a chat.
 The keyword can be a full regex expression.
 
 ```bash
-chatminer plot-freq -c "chat_name" -k "keyword"
+chatminer frequency -c "chat_name" -k "keyword"
 ```
 
 Plot the frequency of messages for each sender in a chat.
 This command supports keyword filtering like the previous one.
 
 ```bash
-chatminer plot-freq-per-sender -c "chat_name" -k "keyword"
+chatminer frequency-per-sender -c "chat_name" -k "keyword"
 ```
 
 Delete an imported chat.
@@ -54,13 +54,13 @@ with the configured name to already exist.
 Set persistent configuration options.
 
 ```bash
-chatminer set-config -n "database.host" -v "localhost"
+chatminer configure -n "database.host" -v "localhost"
 ```
 
 Reset chatminer's config file to its default values.
 
 ```bash
-chatminer set-config -r
+chatminer configure -r
 ```
 
 Uninstall chatminer: remove files persisted by it and databases created 

@@ -48,7 +48,7 @@ def delete(cli: milc.MILC) -> None:
 @milc.cli.argument('-c', '--chat', help="The database table to plot frequency for")
 @milc.cli.argument('-k', '--keyword', help="A keyword to plot the frequency of in the given chat")
 @milc.cli.subcommand('Plot the message frequency over time for a specific chat')
-def plot_freq(cli: milc.MILC) -> None:
+def frequency(cli: milc.MILC) -> None:
     chat_name = cli.args.chat if cli.args.chat else missing_arg("Chat name is required")
 
     with db.create_conn('postgres') as conn:
@@ -68,7 +68,7 @@ def plot_freq(cli: milc.MILC) -> None:
 @milc.cli.argument('-c', '--chat', help="The database table to plot frequency for")
 @milc.cli.argument('-k', '--keyword', help="A keyword to plot the frequency of in the given chat")
 @milc.cli.subcommand('Plot the message frequency over time for each sender in a specific chat')
-def plot_freq_per_sender(cli: milc.MILC) -> None:
+def frequency_per_sender(cli: milc.MILC) -> None:
     chat_name = cli.args.chat if cli.args.chat else missing_arg("Chat name is required")
 
     with db.create_conn('postgres') as conn:
@@ -89,7 +89,7 @@ def plot_freq_per_sender(cli: milc.MILC) -> None:
 @milc.cli.argument('-v', '--value', help="The value to set the configuration item to")
 @milc.cli.argument('-r', '--reset', action="store_true", help="Reset the chatminer configurations to default values")
 @milc.cli.subcommand("Set a chatminer configuration item, using dot notation\nExample: 'chatminer set-config -n database.password -v myPassword'")
-def set_config(cli: milc.MILC) -> None:
+def configure(cli: milc.MILC) -> None:
     if cli.args.reset:
         config.reset_configs()
     else:
