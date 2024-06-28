@@ -27,6 +27,13 @@ The keyword can be a full regex expression.
 chatminer plot-freq -c "chat_name" -k "keyword"
 ```
 
+Plot the frequency of messages for each sender in a chat.
+This command supports keyword filtering like the previous one.
+
+```bash
+chatminer plot-freq-per-sender -c "chat_name" -k "keyword"
+```
+
 Delete an imported chat.
 
 ```bash
