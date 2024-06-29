@@ -77,6 +77,7 @@ def notifications(cli: milc.MILC) -> None:
     with db.create_connection() as conn:
         notifications = db.get_all_notifications(conn, chat_name)
 
+    log(f"Showing {len(notifications)} notifications")
     for notification in notifications:
         log(f"{notification.time} - {notification.text}")
 
