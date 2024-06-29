@@ -13,7 +13,8 @@ DEFAULT_CONFIGS = {
         'host': 'localhost',
         'name': 'chatminer',
         'user': 'postgres',
-        'password': ''
+        'password': '',
+        'path': Path(PlatformDirs("chatminer").user_data_dir) / 'chatminer.db'
     }
 }
 

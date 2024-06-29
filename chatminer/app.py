@@ -1,7 +1,7 @@
 import re
 import milc
 
-from chatminer import parser, db, viz, config
+from chatminer import parser, viz, config, sqlitedb
 from chatminer.common import log, error
 
 configs = config.configs
@@ -24,15 +24,11 @@ def create(cli: milc.MILC) -> None:
 
     messages, notifications = parser.parse(lines)
 
-    if configs['database']['admin']:
-        with db.create_conn('postgres', autocommit=True) as conn:
-            db.create_db(conn)
-
-    with db.create_conn(configs['database']['name']) as conn:
-        db.create_messages_table(conn, chat_name)
-        db.insert_messages(conn, chat_name, messages)
-        db.create_notifications_table(conn, f'{chat_name}_notifications')
-        db.insert_notifications(conn, f'{chat_name}_notifications', notifications)
+    with sqlitedb.create_connection() as conn:
+        sqlitedb.create_messages_table(conn, chat_name)
+        sqlitedb.insert_messages(conn, chat_name, messages)
+        sqlitedb.create_notifications_table(conn, f'{chat_name}_notifications')
+        sqlitedb.insert_notifications(conn, f'{chat_name}_notifications', notifications)
 
 
 @milc.cli.argument('-c', '--chat', help="The name of the chat to delete")
@@ -40,9 +36,9 @@ def create(cli: milc.MILC) -> None:
 def delete(cli: milc.MILC) -> None:
     chat_name = cli.args.chat if cli.args.chat else missing_arg("Chat name is required")
 
-    with db.create_conn(configs['database']['name']) as conn:
-        db.delete_table(conn, chat_name)
-        db.delete_table(conn, f"{chat_name}_notifications")
+    with sqlitedb.create_connection() as conn:
+        sqlitedb.delete_table(conn, chat_name)
+        sqlitedb.delete_table(conn, f"{chat_name}_notifications")
 
 
 @milc.cli.argument('-c', '--chat', help="The database table to plot frequency for")
@@ -51,13 +47,8 @@ def delete(cli: milc.MILC) -> None:
 def frequency(cli: milc.MILC) -> None:
     chat_name = cli.args.chat if cli.args.chat else missing_arg("Chat name is required")
 
-    with db.create_conn('postgres') as conn:
-        if not db.db_exists(conn, configs['database']['name']):
-            error(f"Database does not exist, import a chat to create it")
-            exit(1)
-
-    with db.create_conn(configs['database']['name']) as conn:
-        messages = db.get_all_messages(conn, chat_name)
+    with sqlitedb.create_connection() as conn:
+        messages = sqlitedb.get_all_messages(conn, chat_name)
 
     keyword = cli.args.keyword
     if keyword is not None:
@@ -71,13 +62,8 @@ def frequency(cli: milc.MILC) -> None:
 def frequency_per_sender(cli: milc.MILC) -> None:
     chat_name = cli.args.chat if cli.args.chat else missing_arg("Chat name is required")
 
-    with db.create_conn('postgres') as conn:
-        if not db.db_exists(conn, configs['database']['name']):
-            error(f"Database does not exist, import a chat to create it")
-            exit(1)
-
-    with db.create_conn(configs['database']['name']) as conn:
-        messages = db.get_all_messages(conn, chat_name)
+    with sqlitedb.create_connection() as conn:
+        messages = sqlitedb.get_all_messages(conn, chat_name)
 
     keyword = cli.args.keyword
     if keyword is not None:
@@ -101,9 +87,7 @@ def configure(cli: milc.MILC) -> None:
 @milc.cli.subcommand("Removes all files and databases persisted by chatminer on the local system")
 def uninstall(cli: milc.MILC) -> None:
     config.delete_configs()
-
-    with db.create_conn('postgres', autocommit=True) as conn:
-        db.delete_db(conn)
+    sqlitedb.delete_database()
 
 
 def missing_arg(arg_name: str) -> None:

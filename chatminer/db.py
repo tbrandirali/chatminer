@@ -1,7 +1,7 @@
 import psycopg
 from psycopg import sql
 
-from chatminer.common import log, error
+from chatminer.common import log
 from chatminer.config import configs
 from chatminer.model.message import Message
 from chatminer.model.notification import Notification
@@ -106,7 +106,6 @@ def delete_table(conn: psycopg.Connection, table_name: str) -> None:
         if cursor.statusmessage == "DROP TABLE":
             log(f"Database table {table_name} deleted")
         else:
-            log(f"delete_table statusmessage: {cursor.statusmessage}")
             raise RuntimeError(f"Table {table_name} could not be deleted")
 
 
