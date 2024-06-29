@@ -3,9 +3,6 @@
 Chatminer allows you to import your WhatsApp chats from exported `.txt` files 
 into database tables, and then lets you query and plot various statistics for them.
 
-Chatminer currently depends on an external instance of Postgres for the database.
-Database connection info can be specified using chatminer commands.
-
 ## Installation
 
 You can install chatminer using pip:
@@ -48,31 +45,7 @@ Delete an imported chat:
 chatminer delete -c "chat_name"
 ```
 
-On every run chatminer checks for the existence of its config file;
-if it does not exist then it creates one with defaults, 
-and if it does then it reads the configurations for this run from it.
-
-By default chatminer assumes it is using a local database, 
-running as an admin user with username "_postgres_" and no password.
-If the setting `database.admin` is set to _True_, chatminer will try to create 
-its own database with the name given in `database.name` (defaults to "chatminer"),
-if it doesn't already exist. If it's not running as admin then it expects a database
-with the configured name to already exist.
-
-Set persistent configuration options:
-
-```bash
-chatminer configure -n "database.host" -v "localhost"
-```
-
-Reset chatminer's config file to its default values:
-
-```bash
-chatminer configure -r
-```
-
-Uninstall chatminer, remove files persisted by it and databases created 
-in its current configuration:
+Uninstall chatminer, remove database files and folders created by it:
 
 ```bash
 chatminer uninstall

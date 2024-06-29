@@ -1,141 +1,87 @@
-import psycopg
-from psycopg import sql
+import sqlite3
+import shutil
+from datetime import datetime
+from platformdirs import PlatformDirs
+from pathlib import Path
 
 from chatminer.common import log, error
-from chatminer.config import configs
 from chatminer.model.message import Message
 from chatminer.model.notification import Notification
 
+db_path = Path(PlatformDirs("chatminer").user_data_dir) / 'chatminer.db'
 
-def db_exists(conn: psycopg.Connection, db_name: str) -> bool:
-    with conn.cursor() as cursor:
-        query = sql.SQL("SELECT EXISTS (SELECT {column} FROM {table} WHERE {column} = %s)").format(
-            table=sql.Identifier('pg_database'),
-            column=sql.Identifier('datname'),
+
+def create_connection() -> sqlite3.Connection:
+    if not db_path.parent.is_dir():
+        db_path.parent.mkdir(exist_ok=True, parents=True)
+    return sqlite3.connect(db_path)
+
+
+def create_messages_table(conn: sqlite3.Connection, table_name: str) -> None:
+    conn.execute(f"""
+        CREATE TABLE IF NOT EXISTS {table_name} (
+            id SERIAL PRIMARY KEY,
+            time TIMESTAMP WITHOUT TIME ZONE NOT NULL,
+            sender TEXT NOT NULL,
+            text TEXT NOT NULL
         )
-        cursor.execute(query, (db_name,))
-        return cursor.fetchall()[0][0]
+    """)
+    log(f"Database table '{table_name}' created")
 
 
-def create_conn(db_name: str, autocommit: bool = False) -> psycopg.Connection:
-    host = configs['database']['host']
-    user = configs['database']['user']
-    password = configs['database']['password']
-    pwd_suffix = f":{password}" if password else ""
-    return psycopg.connect(
-        f"postgresql://{user}{pwd_suffix}@{host}:5432/{db_name}",
-        autocommit=autocommit
-    )
-
-
-def create_db(conn: psycopg.Connection) -> None:
-    exists = db_exists(conn, configs['database']['name'])
-    with conn.cursor() as cursor:
-        if exists:
-            log("Database 'chatminer' already exists")
-        else:
-            query = sql.SQL("CREATE DATABASE {db_name}").format(
-                db_name=sql.Identifier(configs['database']['name'])
-            )
-            cursor.execute(query)
-            if cursor.statusmessage == "CREATE DATABASE":
-                log("Database 'chatminer' created")
-            else:
-                raise RuntimeError("Database 'chatminer' does not exist and could not be created")
-
-
-def delete_db(conn: psycopg.Connection) -> None:
-    with conn.cursor() as cursor:
-        query = sql.SQL("DROP DATABASE IF EXISTS {db_name}").format(
-            db_name=sql.Identifier(configs['database']['name'])
+def create_notifications_table(conn: sqlite3.Connection, table_name: str) -> None:
+    conn.execute(f"""
+        CREATE TABLE IF NOT EXISTS {table_name} (
+            id SERIAL PRIMARY KEY,
+            time TIMESTAMP WITHOUT TIME ZONE NOT NULL,
+            text TEXT NOT NULL
         )
-        cursor.execute(query)
-        log(cursor.statusmessage)
-        if cursor.statusmessage == "DROP DATABASE":
-            log("Database 'chatminer' deleted")
-        else:
-            raise RuntimeError("Error deleting database")
+    """)
+    log(f"Database table '{table_name}' created")
 
 
-def create_messages_table(conn: psycopg.Connection, table_name: str) -> None:
-    with conn.cursor() as cursor:
-        query = sql.SQL("""
-            CREATE TABLE IF NOT EXISTS {table_name} (
-                id SERIAL PRIMARY KEY,
-                time TIMESTAMP WITHOUT TIME ZONE NOT NULL,
-                sender TEXT NOT NULL,
-                text TEXT NOT NULL
-            )
-        """).format(
-            table_name=sql.Identifier(table_name)
-        )
-        cursor.execute(query)
-        if cursor.statusmessage == "CREATE TABLE":
-            log(f"Database table '{table_name}' created")
-        else:
-            raise RuntimeError(f"Table {table_name} does not exist and could not be created")
+def delete_table(conn: sqlite3.Connection, table_name: str) -> None:
+    conn.execute(f"""
+        DROP TABLE {table_name}
+    """)
+    log(f"Database table {table_name} deleted")
 
 
-def create_notifications_table(conn: psycopg.Connection, table_name: str) -> None:
-    with conn.cursor() as cursor:
-
-        query = sql.SQL("""
-            CREATE TABLE IF NOT EXISTS {table_name} (
-                id SERIAL PRIMARY KEY,
-                time TIMESTAMP WITHOUT TIME ZONE NOT NULL,
-                text TEXT NOT NULL
-            )
-        """).format(
-            table_name=sql.Identifier(table_name)
-        )
-        cursor.execute(query)
-        if cursor.statusmessage == "CREATE TABLE":
-            log(f"Database table '{table_name}' created")
-        else:
-            raise RuntimeError(f"Table {table_name} does not exist and could not be created")
-
-
-def delete_table(conn: psycopg.Connection, table_name: str) -> None:
-    with conn.cursor() as cursor:
-        query = sql.SQL("""
-            DROP TABLE {table_name}
-        """).format(
-            table_name=sql.Identifier(table_name)
-        )
-        cursor.execute(query)
-        if cursor.statusmessage == "DROP TABLE":
-            log(f"Database table {table_name} deleted")
-        else:
-            log(f"delete_table statusmessage: {cursor.statusmessage}")
-            raise RuntimeError(f"Table {table_name} could not be deleted")
-
-
-def insert_messages(conn: psycopg.Connection, table_name: str, messages: list[Message]) -> None:
-    with conn.cursor() as cursor:
-        insert_query = f"""
+def insert_messages(conn: sqlite3.Connection, table_name: str, messages: list[Message]) -> None:
+    for message in messages:
+        conn.execute(f"""
             INSERT INTO {table_name} (id, time, sender, text) 
-                VALUES (%s, %s, %s, %s)
-        """
-        for message in messages:
-            cursor.execute(insert_query, [message.id, message.time, message.sender, message.text])
-        log(f"Added {len(messages)} new messages")
+                VALUES (?, ?, ?, ?)
+        """, [message.id, message.time, message.sender, message.text])
+    log(f"Added {len(messages)} new messages")
 
 
-def insert_notifications(conn: psycopg.Connection, table_name: str, notifications: list[Notification]) -> None:
-    with conn.cursor() as cursor:
-        insert_query = f"""
+def insert_notifications(conn: sqlite3.Connection, table_name: str, notifications: list[Notification]) -> None:
+    for notification in notifications:
+        conn.execute(f"""
             INSERT INTO {table_name} (id, time, text) 
-                VALUES (%s, %s, %s)
-        """
-        for notification in notifications:
-            cursor.execute(insert_query, [notification.id, notification.time, notification.text])
-        log(f"Added {len(notifications)} new notifications")
+                VALUES (?, ?, ?)
+        """, [notification.id, notification.time, notification.text])
+    log(f"Added {len(notifications)} new notifications")
 
 
-def get_all_messages(conn: psycopg.Connection, table_name: str) -> list[Message]:
-    with conn.cursor() as cursor:
-        query = f"SELECT * FROM {table_name}"
-        cursor.execute(query)
-        results = cursor.fetchall()
-    messages = [Message(id, time, sender, text) for id, time, sender, text in results]
-    return messages
+def get_all_messages(conn: sqlite3.Connection, table_name: str) -> list[Message]:
+    try:
+        cursor = conn.cursor()
+        results = cursor.execute(f"SELECT * FROM {table_name}").fetchall()
+        return [
+            Message(id, datetime.strptime(time, '%Y-%m-%d %H:%M:%S'), sender, text)
+            for id, time, sender, text in results
+        ]
+    except sqlite3.OperationalError as err:
+        if "no such table:" in str(err):
+            error(f"Chat '{table_name}' not found")
+            exit(1)
+
+
+def delete_database() -> None:
+    if db_path.parent.is_dir():
+        shutil.rmtree(db_path.parent)
+        log("Database file deleted")
+    else:
+        log("No database file found to delete")
