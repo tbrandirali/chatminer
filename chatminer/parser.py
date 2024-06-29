@@ -9,9 +9,9 @@ notification_patterns = [
     r".* changed their phone number to a new number\. Tap to message or add the new number\.$",
     r".* changed their phone number\. You're currently chatting with their new number\. Tap to add it to your contacts\.$",
     r".* changed this group's icon$",
-    r".* added [\+0-9 ]+$",
-    r".* removed [\+0-9 ]+$",
-    r".* changed to [\+0-9 ]+$",
+    r".* added [-\+0-9 ]+$",
+    r".* removed [-\+0-9 ]+$",
+    r".* changed to [-\+0-9 ]+$",
     r".* pinned a message$"
 ]
 line_regex = r'^[0-9]+/[0-9]+/[0-9]+.*'
