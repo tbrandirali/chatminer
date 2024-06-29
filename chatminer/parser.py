@@ -5,9 +5,10 @@ from chatminer.model.notification import Notification
 
 notification_strings = [
     "Messages and calls are end-to-end encrypted. No one outside of this chat, not even WhatsApp, can read or listen to them. Tap to learn more.",
-    "Your security code with ***REMOVED*** changed. Tap to learn more.",
-    "***REMOVED*** changed their phone number to a new number. Tap to message or add the new number.",
-    "***REMOVED*** changed their phone number. You're currently chatting with their new number. Tap to add it to your contacts."
+    "Your security code with changed. Tap to learn more.",
+    "changed their phone number to a new number. Tap to message or add the new number.",
+    "changed their phone number. You're currently chatting with their new number. Tap to add it to your contacts.",
+    "changed this group's icon"
 ]
 line_regex = '^[0-9]+/[0-9]+/[0-9]+.*'
 
