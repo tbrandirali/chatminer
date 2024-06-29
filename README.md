@@ -83,6 +83,12 @@ Plot the frequency of messages for each sender in a chat
 chatminer frequency-per-sender -c "chat_name" -k "keyword"
 ```
 
+Print all the notifications for a chat:
+
+```bash
+chatminer notifications -c "chat_name"
+```
+
 Delete an imported chat:
 
 ```bash

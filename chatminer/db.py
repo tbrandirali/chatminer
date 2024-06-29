@@ -65,17 +65,31 @@ def insert_notifications(conn: sqlite3.Connection, table_name: str, notification
     log(f"Added {len(notifications)} new notifications")
 
 
-def get_all_messages(conn: sqlite3.Connection, table_name: str) -> list[Message]:
+def get_all_messages(conn: sqlite3.Connection, chat_name: str) -> list[Message]:
     try:
         cursor = conn.cursor()
-        results = cursor.execute(f"SELECT * FROM {table_name}").fetchall()
+        results = cursor.execute(f"SELECT * FROM {chat_name}").fetchall()
         return [
             Message(id, datetime.strptime(time, '%Y-%m-%d %H:%M:%S'), sender, text)
             for id, time, sender, text in results
         ]
     except sqlite3.OperationalError as err:
         if "no such table:" in str(err):
-            error(f"Chat '{table_name}' not found")
+            error(f"Chat '{chat_name}' not found")
+            exit(1)
+
+
+def get_all_notifications(conn: sqlite3.Connection, chat_name: str) -> list[Notification]:
+    try:
+        cursor = conn.cursor()
+        results = cursor.execute(f"SELECT * FROM {chat_name}_notifications").fetchall()
+        return [
+            Notification(id, datetime.strptime(time, '%Y-%m-%d %H:%M:%S'), text)
+            for id, time, text in results
+        ]
+    except sqlite3.OperationalError as err:
+        if "no such table:" in str(err):
+            error(f"Chat '{chat_name}' not found")
             exit(1)
 
 

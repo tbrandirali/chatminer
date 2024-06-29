@@ -39,7 +39,7 @@ def delete(cli: milc.MILC) -> None:
         db.delete_table(conn, f"{chat_name}_notifications")
 
 
-@milc.cli.argument('-c', '--chat', help="The database table to plot frequency for")
+@milc.cli.argument('-c', '--chat', help="The chat name to plot frequency for")
 @milc.cli.argument('-k', '--keyword', help="A keyword to plot the frequency of in the given chat")
 @milc.cli.subcommand('Plot the message frequency over time for a specific chat')
 def frequency(cli: milc.MILC) -> None:
@@ -54,7 +54,7 @@ def frequency(cli: milc.MILC) -> None:
     viz.plot_frequency(messages, keyword)
 
 
-@milc.cli.argument('-c', '--chat', help="The database table to plot frequency for")
+@milc.cli.argument('-c', '--chat', help="The chat name to plot frequency for")
 @milc.cli.argument('-k', '--keyword', help="A keyword to plot the frequency of in the given chat")
 @milc.cli.subcommand('Plot the message frequency over time for each sender in a specific chat')
 def frequency_per_sender(cli: milc.MILC) -> None:
@@ -67,6 +67,18 @@ def frequency_per_sender(cli: milc.MILC) -> None:
     if keyword is not None:
         messages = [message for message in messages if re.search(keyword, message.text, re.IGNORECASE)]
     viz.plot_frequency_per_sender(messages, keyword)
+
+
+@milc.cli.argument('-c', '--chat', help="The chat name to show notifications for")
+@milc.cli.subcommand('Print all the notifications for a chat')
+def notifications(cli: milc.MILC) -> None:
+    chat_name = cli.args.chat if cli.args.chat else missing_arg("Chat name is required")
+
+    with db.create_connection() as conn:
+        notifications = db.get_all_notifications(conn, chat_name)
+
+    for notification in notifications:
+        log(f"{notification.time} - {notification.text}")
 
 
 @milc.cli.subcommand("Removes all files and databases persisted by chatminer on the local system")
