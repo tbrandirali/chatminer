@@ -11,6 +11,14 @@ You can install chatminer using pip:
 pip install git+https://github.com/tbrandirali/chatminer.git@main
 ```
 
+## WhatsApp export files
+
+Whatsapp desktop does not load the entire chat history, 
+so the chat exports from desktop will be incomplete.
+Also, the message format in the desktop exports is different from the mobile ones.
+Because of this chatminer only supports loading exports from WhatsApp mobile.
+Before running chatminer, extract the `.txt` file from the `.zip` archive.
+
 ## Usage
 
 Import a new chat from a `.txt` file:
