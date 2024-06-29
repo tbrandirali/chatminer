@@ -12,8 +12,8 @@ class Message(object):
     @staticmethod
     def from_string(id: int, line: str):
         time = datetime.strptime(line.split(' - ')[0], '%m/%d/%y, %H:%M')
-        sender = line.split(' - ')[1].split(':')[0]
-        text = line.split(' - ')[1].split(': ')[1]
+        sender = line.split(' - ', maxsplit=1)[1].split(':')[0]
+        text = line.split(' - ', maxsplit=1)[1].split(': ')[1]
         return Message(id, time, sender, text)
 
     def __str__(self):

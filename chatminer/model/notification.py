@@ -10,8 +10,8 @@ class Notification(object):
 
     @staticmethod
     def from_string(id: int, line: str):
-        time = datetime.strptime(line.split(' - ')[0], '%m/%d/%y, %H:%M')
-        text = line.split(' - ')[1]
+        time = datetime.strptime(line.split(' - ', maxsplit=1)[0], '%m/%d/%y, %H:%M')
+        text = line.split(' - ', maxsplit=1)[1]
         return Notification(id, time, text)
 
     def __str__(self):
