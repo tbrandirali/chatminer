@@ -13,20 +13,13 @@ pip install git+https://github.com/tbrandirali/chatminer.git@main
 
 ## WhatsApp export files
 
-Whatsapp desktop does not load the entire chat history, 
-so the chat exports from desktop will be incomplete.
+Whatsapp desktop does not load the entire chat history, so the chat exports from desktop will be incomplete.
 Also, the message format in the desktop exports is different from the mobile ones.
 Because of this, chatminer only supports loading exports from WhatsApp mobile.
 Before running chatminer, extract the `.txt` file from the `.zip` archive.
 
-WhatsApp exports include chat notifications, such as:
-"_Alice changed their phone number to a new number_" or
-"_Your security code with Bob changed_."
-Chatminer tries to filter these out with a hardcoded list of standard notifications,
-but this list is probably incomplete.
-
 Since WhatsApp does not properly escape messages and contact names,
-there are edge cases in which chatminer may not accurately parse messages or filter notifications.
+there are edge cases in which chatminer may not accurately parse messages.
 For example, since WhatsApp does not escape newlines in exports, 
 a line in the file could be either a new message or a continuation of the previous one.
 Chatminer attempts to fix it by detecting whether lines start with a timestamp, but this approach has limits.
@@ -46,8 +39,10 @@ In a chat export, since WhatsApp does not escape newlines, that would look like:
 That is completely ambiguous. There is no sure way to tell whether the second line is a separate message
 or a continuation of the content of the previous one, and so chatminer will parse it as a separate message.
 
-Chat notifications also introduce unavoidable ambiguity, 
-largely revolving around the possibility of contact names containing colons.
+WhatsApp exports also include chat notifications, such as:
+"_Alice changed their phone number to a new number_" or "_Your security code with Bob changed_."
+Chatminer tries to filter these out by detecting the separator `": "` (colon + space) indicating a message.
+This however creates additional ambiguity, due to the possibility of contact names containing colons.
 
 For example, this line:
 ```
@@ -56,10 +51,9 @@ For example, this line:
 
 could be a message by `Alice` saying she pinned a message, 
 or it could be a notification saying that a contact named `Alice:` (with the colon) pinned a message.
-Chatminer would parse it as a notification.
+Chatminer would parse it as a message.
 
-In general, messages which accidentally fit notification patterns will be parsed as notifications.
-For a list of the notification patterns see [parser.py](chatminer/parser.py).
+In general, if a contact name contains a colon stuff may break.
 
 ## Usage
 
