@@ -1,7 +1,9 @@
-import pandas as pd
-import matplotlib.pyplot as plt
+from collections import defaultdict
 from warnings import filterwarnings
 from datetime import datetime
+
+import pandas as pd
+import matplotlib.pyplot as plt
 
 from chatminer.model.message import Message
 
@@ -49,16 +51,13 @@ def plot_frequency_per_sender(messages: list[Message], keyword: str) -> None:
     plt.grid(True)
     plt.legend()
 
-    filterwarnings('ignore')    # Matplotlib complains about emoji chars missing from its font
+    filterwarnings('ignore')  # Matplotlib complains about emoji chars missing from its font
     plt.show()
     filterwarnings('default')
 
 
 def timestamps_per_sender(messages: list[Message]) -> dict[str, list[datetime]]:
-    output = {}
+    output = defaultdict(list)
     for message in messages:
-        if message.sender in output.keys():
-            output[message.sender].append(message.time)
-        else:
-            output[message.sender] = [message.time]
-    return output
+        output[message.sender].append(message.time)
+    return dict(output)

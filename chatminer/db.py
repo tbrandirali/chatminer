@@ -77,6 +77,8 @@ def get_all_messages(conn: sqlite3.Connection, chat_name: str) -> list[Message]:
         if "no such table:" in str(err):
             error(f"Chat '{chat_name}' not found")
             exit(1)
+        else:
+            raise err
 
 
 def get_all_notifications(conn: sqlite3.Connection, chat_name: str) -> list[Notification]:
@@ -91,6 +93,8 @@ def get_all_notifications(conn: sqlite3.Connection, chat_name: str) -> list[Noti
         if "no such table:" in str(err):
             error(f"Chat '{chat_name}' not found")
             exit(1)
+        else:
+            raise err
 
 
 def delete_database() -> None:

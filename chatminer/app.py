@@ -1,8 +1,9 @@
 import re
 import milc
 
-from chatminer import parser, viz, db
+from chatminer import parser, plotter, db, printer
 from chatminer.common import log, error
+from chatminer.processor import group_messages, average_words, average_length
 
 
 @milc.cli.entrypoint('This is chatminer! Specify a command to use...')
@@ -51,7 +52,7 @@ def frequency(cli: milc.MILC) -> None:
     keyword = cli.args.keyword
     if keyword is not None:
         messages = [message for message in messages if re.search(keyword, message.text, re.IGNORECASE)]
-    viz.plot_frequency(messages, keyword)
+    plotter.plot_frequency(messages, keyword)
 
 
 @milc.cli.argument('-c', '--chat', help="The chat name to plot frequency for")
@@ -66,7 +67,7 @@ def frequency_per_sender(cli: milc.MILC) -> None:
     keyword = cli.args.keyword
     if keyword is not None:
         messages = [message for message in messages if re.search(keyword, message.text, re.IGNORECASE)]
-    viz.plot_frequency_per_sender(messages, keyword)
+    plotter.plot_frequency_per_sender(messages, keyword)
 
 
 @milc.cli.argument('-c', '--chat', help="The chat name to show notifications for")
@@ -80,6 +81,22 @@ def notifications(cli: milc.MILC) -> None:
     log(f"Showing {len(notifications)} notifications")
     for notification in notifications:
         log(f"{notification.time} - {notification.text}")
+
+
+@milc.cli.argument('-c', '--chat', help="The chat name to show a summary for")
+@milc.cli.subcommand('Print a summary of statistics for a chat')
+def senders(cli: milc.MILC) -> None:
+    chat_name = cli.args.chat if cli.args.chat else missing_arg("Chat name is required")
+
+    with db.create_connection() as conn:
+        messages = db.get_all_messages(conn, chat_name)
+    sender_messages = group_messages(messages, lambda msg: msg.sender)
+    averages = [
+        [sender, len(messages), average_words(messages), average_length(messages)]
+        for sender, messages in sender_messages.items()
+    ]
+    averages = [["Sender", "Messages", "Avg. Words", "Avg. Length"]] + averages
+    printer.print_table(averages)
 
 
 @milc.cli.subcommand("Removes all files and databases persisted by chatminer on the local system")
