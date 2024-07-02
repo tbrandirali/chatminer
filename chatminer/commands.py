@@ -55,8 +55,8 @@ def senders(chat_name: str) -> None:
         messages = db.get_all_messages(conn, chat_name)
 
     blocks = processor.build_blocks(messages)
-    sender_blocks = processor.group_by(blocks, lambda block: block.sender)
-    sender_messages = processor.group_by(messages, lambda msg: msg.sender)
+    sender_blocks = common.group_by(lambda block: block.sender, blocks)
+    sender_messages = common.group_by(lambda msg: msg.sender, messages)
     zipped_dicts = zip_dicts(sender_messages, sender_blocks)
     averages = [
         [

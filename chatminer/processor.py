@@ -1,20 +1,12 @@
 import re
 import statistics
-from collections import defaultdict
 from datetime import timedelta
-from typing import Callable, Any, Iterable, Iterator
+from typing import Iterator
 
 from chatminer.model.block import Block
 from chatminer.model.message import Message
 
 BLOCK_MAX_INTERVAL = timedelta(hours=1)
-
-
-def group_by(items: Iterable[Any], func: Callable[[Message], str]) -> dict[str, list[Any]]:
-    output = defaultdict(list)
-    for item in items:
-        output[func(item)].append(item)
-    return dict(output)
 
 
 def build_blocks(messages: list[Message]) -> Iterator[Block]:
