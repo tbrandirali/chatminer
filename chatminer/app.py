@@ -1,9 +1,11 @@
 import re
+from typing import Iterable, Any
+
 import milc
 
 from chatminer import parser, plotter, db, printer
 from chatminer.common import log, error
-from chatminer.processor import group_messages, average_words, average_length
+from chatminer.processor import group_by, build_blocks, average_words, average_length, average_block_size
 
 
 @milc.cli.entrypoint('This is chatminer! Specify a command to use...')
@@ -90,12 +92,16 @@ def senders(cli: milc.MILC) -> None:
 
     with db.create_connection() as conn:
         messages = db.get_all_messages(conn, chat_name)
-    sender_messages = group_messages(messages, lambda msg: msg.sender)
+
+    blocks = build_blocks(messages)
+    sender_blocks = group_by(blocks, lambda block: block.sender)
+    sender_messages = group_by(messages, lambda msg: msg.sender)
+    zipped_dicts = zip_dicts(sender_messages, sender_blocks)
     averages = [
-        [sender, len(messages), average_words(messages), average_length(messages)]
-        for sender, messages in sender_messages.items()
+        [sender, len(messages), average_words(messages), average_length(messages), average_block_size(blocks)]
+        for sender, messages, blocks in zipped_dicts
     ]
-    averages = [["Sender", "Messages", "Avg. Words", "Avg. Length"]] + averages
+    averages = [["Sender", "Messages", "Avg. Words", "Avg. Length", "Avg. Block Size"]] + averages
     printer.print_table(averages)
 
 
@@ -107,6 +113,20 @@ def uninstall(cli: milc.MILC) -> None:
 def missing_arg(arg_name: str) -> None:
     error(f"{arg_name} is required!")
     exit(1)
+
+
+def flatten(iterables: list[Iterable[Any]]) -> list[Any]:
+    output = []
+    for iterable in iterables:
+        output += iterable
+    return output
+
+
+def zip_dicts(*dcts: dict[str, Any]) -> tuple[str, dict[Any], dict[Any]]:
+    if not dcts:
+        return
+    for i in set(dcts[0]).intersection(*dcts[1:]):
+        yield (i,) + tuple(d[i] for d in dcts)
 
 
 def main() -> None:
