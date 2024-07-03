@@ -75,7 +75,7 @@ def uninstall() -> None:
     db.delete_database()
 
 
-def flatten(iterables: list[Iterable[Any]]) -> list[Any]:
+def flatten(iterables: Iterable[Iterable[Any]]) -> list[Any]:
     output = []
     for iterable in iterables:
         output += iterable

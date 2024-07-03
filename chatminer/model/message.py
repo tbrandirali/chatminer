@@ -1,5 +1,7 @@
 from datetime import datetime
 
+from chatminer import common
+
 
 class Message(object):
 
@@ -17,4 +19,4 @@ class Message(object):
         return Message(id, time, sender, text)
 
     def __str__(self):
-        return f"Message(id={self.id}, time={self.time}, sender={self.sender}, text='{self.text}'"
+        return f"{self.time} - {self.sender}: '{common.truncate(self.text, 40)}'"

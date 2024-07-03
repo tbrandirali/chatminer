@@ -1,5 +1,7 @@
 from datetime import datetime
 
+from chatminer import common
+
 
 class Notification(object):
 
@@ -15,4 +17,4 @@ class Notification(object):
         return Notification(id, time, text)
 
     def __str__(self):
-        return f"Notification(id={self.id}, time={self.time}, text='{self.text}'"
+        return f"{self.time} - '{common.truncate(self.text, 40)}'"

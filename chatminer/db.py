@@ -1,6 +1,8 @@
 import sqlite3
 import shutil
 from datetime import datetime
+from typing import Iterable
+
 from platformdirs import PlatformDirs
 from pathlib import Path
 
@@ -47,22 +49,26 @@ def delete_table(conn: sqlite3.Connection, table_name: str) -> None:
     log(f"Database table {table_name} deleted")
 
 
-def insert_messages(conn: sqlite3.Connection, table_name: str, messages: list[Message]) -> None:
+def insert_messages(conn: sqlite3.Connection, table_name: str, messages: Iterable[Message]) -> None:
+    i = 0
     for message in messages:
         conn.execute(f"""
             INSERT INTO {table_name} (id, time, sender, text) 
                 VALUES (?, ?, ?, ?)
         """, [message.id, message.time, message.sender, message.text])
-    log(f"Added {len(messages)} new messages")
+        i += 1
+    log(f"Added {i} new messages")
 
 
-def insert_notifications(conn: sqlite3.Connection, table_name: str, notifications: list[Notification]) -> None:
+def insert_notifications(conn: sqlite3.Connection, table_name: str, notifications: Iterable[Notification]) -> None:
+    i = 0
     for notification in notifications:
         conn.execute(f"""
             INSERT INTO {table_name} (id, time, text) 
                 VALUES (?, ?, ?)
         """, [notification.id, notification.time, notification.text])
-    log(f"Added {len(notifications)} new notifications")
+        i += 1
+    log(f"Added {i} new notifications")
 
 
 def get_all_messages(conn: sqlite3.Connection, chat_name: str) -> list[Message]:

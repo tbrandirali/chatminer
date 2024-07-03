@@ -8,12 +8,16 @@ from chatminer.model.message import Message
 
 
 def log(text: str) -> None:
-    cli.log.info(f'[chatminer] - {text}')
+    cli.log.info(f"[chatminer] - {text}")
 
 
 def log_multiline(text: str) -> None:
     for line in text.splitlines():
-        cli.log.info(f'[chatminer] - {line}')
+        cli.log.info(f"[chatminer] - {line}")
+
+
+def warn(text: str) -> None:
+    cli.log.warn(f"[chatminer] - WARNING: {text}")
 
 
 def error(text: str) -> None:
@@ -26,3 +30,7 @@ def group_by(func: Callable[[Message], str], items: Iterable[Any]) -> dict[str, 
     for item in items:
         output[func(item)].append(item)
     return dict(output)
+
+
+def truncate(string: str, max_length: int) -> str:
+    return string[:max_length] + '...' if len(string) > max_length else string
