@@ -24,15 +24,15 @@ def build_blocks(messages: Iterable[Message]) -> Iterator[Block]:
 
 
 def average_length(messages: Iterable[Message]) -> float:
-    lengths = [len(message.text) for message in messages]
+    lengths = map(lambda message: len(message.text), messages)
     return round(statistics.fmean(lengths), 2)
 
 
 def average_words(messages: Iterable[Message]) -> float:
-    wordcounts = [len(re.split(r"\s+", message.text)) for message in messages]
+    wordcounts = map(lambda message: len(re.split(r"\s+", message.text)), messages)
     return round(statistics.fmean(wordcounts), 2)
 
 
 def average_block_size(blocks: Iterable[Block]) -> float:
-    sizes = [len(block) for block in blocks]
+    sizes = map(lambda block: len(block), blocks)
     return round(statistics.fmean(sizes), 2)

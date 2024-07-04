@@ -1,5 +1,5 @@
 import re
-from typing import Iterable, Any
+from typing import Iterable, Any, Iterator
 
 from chatminer import common, parser, db, plotter, printer, processor
 
@@ -75,14 +75,13 @@ def uninstall() -> None:
     db.delete_database()
 
 
-def flatten(iterables: Iterable[Iterable[Any]]) -> list[Any]:
-    output = []
+def flatten(iterables: Iterable[Iterable[Any]]) -> Iterator[Any]:
     for iterable in iterables:
-        output += iterable
-    return output
+        for element in iterable:
+            yield element
 
 
-def zip_dicts(*dcts: dict[str, Any]) -> tuple[str, dict[Any], dict[Any]]:
+def zip_dicts(*dcts: dict[str, Any]) -> tuple[str, Any, Any]:
     if not dcts:
         return
     for i in set(dcts[0]).intersection(*dcts[1:]):

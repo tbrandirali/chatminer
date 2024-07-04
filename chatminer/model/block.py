@@ -22,5 +22,10 @@ class Block(object):
         return len(self.__messages)
 
     def __str__(self) -> str:
-        message_lines = "\n".join(map(lambda msg: f"\t{msg.time} - {common.truncate(msg.text, 50)}", self.__messages))
+        message_lines = "\n".join(
+            map(
+                lambda msg: f"\t{msg.time} - {common.truncate(msg.text, 50)}",
+                self.__messages
+            )
+        )
         return f"{self.sender}: [\n{message_lines}\n]"
