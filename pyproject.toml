@@ -17,7 +17,6 @@ requires-python = ">=3.8"
 dependencies = [
     'matplotlib',
     'dateutils',
-    'psycopg[binary]',
     'platformdirs',
     'pandas',
     'milc',
